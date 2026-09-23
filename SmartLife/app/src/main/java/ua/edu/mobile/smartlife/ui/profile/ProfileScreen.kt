@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -150,6 +151,11 @@ fun ProfileContent(
                 headlineContent = { Text(uiState.email) },
                 supportingContent = { Text("Електронна пошта") },
                 leadingContent = { Icon(Icons.Filled.Email, contentDescription = null) }
+            )
+            ListItem(
+                headlineContent = { Text("Дані з сервера (GET /auth/me)") },
+                supportingContent = { Text(uiState.serverInfo ?: "Завантаження...") },
+                leadingContent = { Icon(Icons.Filled.Cloud, contentDescription = null) }
             )
             ListItem(
                 headlineContent = { Text("Налаштування") },

@@ -3,10 +3,13 @@ package ua.edu.mobile.smartlife.di
 import android.content.Context
 import androidx.room.Room
 import ua.edu.mobile.smartlife.ble.BleManager
+import ua.edu.mobile.smartlife.data.auth.SessionStorage
 import ua.edu.mobile.smartlife.data.local.AppDatabase
 import ua.edu.mobile.smartlife.data.profile.ProfilePhotoStorage
+import ua.edu.mobile.smartlife.data.remote.AuthApi
 import ua.edu.mobile.smartlife.data.remote.NetworkModule
 import ua.edu.mobile.smartlife.data.remote.WeatherApi
+import ua.edu.mobile.smartlife.data.repository.AuthRepository
 import ua.edu.mobile.smartlife.data.repository.NetworkWeatherRepository
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
 import ua.edu.mobile.smartlife.data.repository.RoomRecordRepository
@@ -65,7 +68,13 @@ class AppContainer(private val context: Context) {
         ReminderScheduler(context)
     }
 
+    val authRepository: AuthRepository by lazy {
+        val api = NetworkModule.createRetrofit(AUTH_BASE_URL).create(AuthApi::class.java)
+        AuthRepository(api, SessionStorage(context))
+    }
+
     private companion object {
         const val WEATHER_BASE_URL = "https://api.open-meteo.com/"
+        const val AUTH_BASE_URL = "https://dummyjson.com/"
     }
 }

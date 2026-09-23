@@ -1,16 +1,24 @@
 package ua.edu.mobile.smartlife.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -20,6 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ua.edu.mobile.smartlife.ui.auth.LoginScreen
+import ua.edu.mobile.smartlife.ui.auth.RegisterScreen
 import ua.edu.mobile.smartlife.ui.ble.BleScreen
 import ua.edu.mobile.smartlife.ui.device.DeviceHubScreen
 import ua.edu.mobile.smartlife.ui.home.HomeScreen
@@ -34,6 +43,7 @@ import ua.edu.mobile.smartlife.ui.navigation.MapRoute
 import ua.edu.mobile.smartlife.ui.navigation.ProfileRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordDetailsRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordsRoute
+import ua.edu.mobile.smartlife.ui.navigation.RegisterRoute
 import ua.edu.mobile.smartlife.ui.navigation.SensorsRoute
 import ua.edu.mobile.smartlife.ui.navigation.SettingsRoute
 import ua.edu.mobile.smartlife.ui.navigation.topLevelDestinations
@@ -45,10 +55,30 @@ import ua.edu.mobile.smartlife.ui.settings.SettingsScreen
 
 /** Кореневий composable: нижня панель + граф навігації між екранами. */
 @Composable
-fun SmartLifeApp() {
+fun SmartLifeApp(
+    sessionViewModel: SessionViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val isLoggedIn by sessionViewModel.isLoggedIn.collectAsStateWithLifecycle()
+
+    // Поки читаємо збережену сесію — показуємо індикатор, щоб не "блимав" екран входу
+    if (isLoggedIn == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    // Стартовий екран обираємо ОДИН раз: є сесія — одразу на головну
+    val startDestination: Any = remember { if (isLoggedIn == true) HomeRoute else LoginRoute }
+
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
+
+    // Сесія зникла (вихід або прострочений токен) — повертаємося на екран входу
+    LaunchedEffect(isLoggedIn) {
+        val onAuthScreen = currentDestination.isOn(LoginRoute) || currentDestination.isOn(RegisterRoute)
+        if (isLoggedIn == false && currentDestination != null && !onAuthScreen) navController.logout()
+    }
 
     // Нижню панель показуємо лише на "головних" екранах
     val showBottomBar = topLevelDestinations.any { currentDestination.isOn(it.route) }
@@ -72,7 +102,7 @@ fun SmartLifeApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = LoginRoute,
+            startDestination = startDestination,
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
@@ -84,15 +114,19 @@ fun SmartLifeApp() {
                         navController.navigate(HomeRoute) {
                             popUpTo(LoginRoute) { inclusive = true }
                         }
-                    }
+                    },
+                    onRegisterClick = { navController.navigate(RegisterRoute) }
                 )
+            }
+            composable<RegisterRoute> {
+                RegisterScreen(onBack = { navController.popBackStack() })
             }
             composable<HomeRoute> {
                 HomeScreen(
                     onRecordClick = { id -> navController.navigate(RecordDetailsRoute(id)) },
                     onOpenRecords = { navController.navigateToTopLevel(RecordsRoute) },
                     onOpenSettings = { navController.navigate(SettingsRoute) },
-                    onLogout = { navController.logout() }
+                    onLogout = sessionViewModel::logout
                 )
             }
             composable<RecordsRoute> {

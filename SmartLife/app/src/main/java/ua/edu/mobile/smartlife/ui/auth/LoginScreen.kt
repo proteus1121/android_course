@@ -14,13 +14,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -33,6 +39,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,19 +49,38 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.edu.mobile.smartlife.R
+import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.theme.SmartLifeTheme
 
-/**
- * Екран входу (прототип розділу 3): лише перевіряє, що поля не порожні.
- * Справжню авторизацію через API додамо в розділі 15.
- */
 @Composable
-fun LoginScreen(onLoggedIn: () -> Unit) {
-    var login by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+fun LoginScreen(
+    onLoggedIn: () -> Unit,
+    onRegisterClick: () -> Unit,
+    viewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LoginContent(
+        uiState = uiState,
+        onUsernameChange = viewModel::onUsernameChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onLoginClick = { viewModel.login(onSuccess = onLoggedIn) },
+        onRegisterClick = onRegisterClick
+    )
+}
+
+/** Екран входу без логіки — лише відображення стану (зручно для превʼю та UI-тестів). */
+@Composable
+fun LoginContent(
+    uiState: LoginUiState,
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit
+) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -64,7 +91,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(16.dp))
             Image(
                 painter = painterResource(R.drawable.ic_logo),
                 contentDescription = "Логотип Smart Life",
@@ -78,21 +105,26 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = login,
-                onValueChange = { login = it; error = null },
+                value = uiState.username,
+                onValueChange = onUsernameChange,
                 label = { Text("Логін") },
                 leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) },
+                isError = uiState.usernameError != null,
+                supportingText = uiState.usernameError?.let { { Text(it) } },
                 singleLine = true,
+                enabled = !uiState.isLoading,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("username")
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it; error = null },
+                value = uiState.password,
+                onValueChange = onPasswordChange,
                 label = { Text("Пароль") },
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
                 trailingIcon = {
@@ -104,32 +136,50 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                     }
                 },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                isError = uiState.passwordError != null,
+                supportingText = uiState.passwordError?.let { { Text(it) } },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                isError = error != null,
-                supportingText = { error?.let { Text(it) } },
-                modifier = Modifier.fillMaxWidth()
+                enabled = !uiState.isLoading,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("password")
             )
+
+            uiState.error?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .testTag("loginError")
+                )
+            }
             Spacer(Modifier.height(16.dp))
             Button(
-                onClick = {
-                    if (login.isBlank() || password.isBlank()) {
-                        error = "Введіть логін і пароль"
-                    } else {
-                        onLoggedIn()
-                    }
-                },
+                onClick = onLoginClick,
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text("Увійти")
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp, color = Color.White)
+                } else {
+                    Text("Увійти")
+                }
             }
-            TextButton(onClick = { error = "Реєстрацію додамо в розділі 15" }) {
+            TextButton(onClick = onRegisterClick, enabled = !uiState.isLoading) {
                 Text("Немає акаунта? Зареєструватися")
+            }
+            Spacer(Modifier.height(8.dp))
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                ListItem(
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                    leadingContent = { Icon(Icons.Filled.Info, contentDescription = null) },
+                    headlineContent = { Text("Тестовий акаунт DummyJSON") },
+                    supportingContent = { Text("Логін: emilys\nПароль: emilyspass") }
+                )
             }
         }
     }
@@ -137,6 +187,11 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun LoginScreenPreview() {
-    SmartLifeTheme { LoginScreen(onLoggedIn = {}) }
+private fun LoginContentPreview() {
+    SmartLifeTheme {
+        LoginContent(
+            uiState = LoginUiState(username = "emilys", error = "Неправильний логін або пароль"),
+            onUsernameChange = {}, onPasswordChange = {}, onLoginClick = {}, onRegisterClick = {}
+        )
+    }
 }

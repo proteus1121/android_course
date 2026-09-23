@@ -6,6 +6,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import ua.edu.mobile.smartlife.SmartLifeApplication
+import ua.edu.mobile.smartlife.ui.auth.LoginViewModel
+import ua.edu.mobile.smartlife.ui.auth.RegisterViewModel
 import ua.edu.mobile.smartlife.ui.ble.BleViewModel
 import ua.edu.mobile.smartlife.ui.home.HomeViewModel
 import ua.edu.mobile.smartlife.ui.location.LocationViewModel
@@ -22,6 +24,16 @@ import ua.edu.mobile.smartlife.ui.settings.SettingsViewModel
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
+        initializer {
+            SessionViewModel(smartLifeApplication().container.authRepository)
+        }
+        initializer {
+            val container = smartLifeApplication().container
+            LoginViewModel(container.authRepository, container.settingsRepository)
+        }
+        initializer {
+            RegisterViewModel(smartLifeApplication().container.authRepository)
+        }
         initializer {
             val container = smartLifeApplication().container
             HomeViewModel(
@@ -65,7 +77,7 @@ object AppViewModelProvider {
         }
         initializer {
             val container = smartLifeApplication().container
-            ProfileViewModel(container.settingsRepository, container.profilePhotoStorage)
+            ProfileViewModel(container.settingsRepository, container.profilePhotoStorage, container.authRepository)
         }
     }
 }

@@ -11,6 +11,7 @@ import kotlinx.serialization.Serializable
 
 // Маршрути (routes) — "адреси" екранів. @Serializable потрібен для типобезпечної навігації.
 @Serializable object LoginRoute
+@Serializable object RegisterRoute
 @Serializable object HomeRoute
 @Serializable object RecordsRoute
 @Serializable object MapRoute
