@@ -21,9 +21,25 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
+import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.components.RecordCard
+
+@Composable
+fun RecordsScreen(
+    onRecordClick: (Long) -> Unit,
+    viewModel: RecordsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val records by viewModel.records.collectAsStateWithLifecycle()
+    RecordsContent(
+        records = records,
+        onAddRecord = viewModel::addRecord,
+        onRecordClick = onRecordClick
+    )
+}
 
 /**
  * Екран списку без власних даних (stateless): список приходить параметром,
@@ -31,7 +47,7 @@ import ua.edu.mobile.smartlife.ui.components.RecordCard
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordsScreen(
+fun RecordsContent(
     records: List<HealthRecord>,
     onAddRecord: (RecordType, Double, String) -> Unit,
     onRecordClick: (Long) -> Unit

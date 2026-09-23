@@ -38,19 +38,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ua.edu.mobile.smartlife.data.model.HealthRecord
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.edu.mobile.smartlife.data.model.RecordType
-import ua.edu.mobile.smartlife.data.model.toDailySummary
+import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.components.RecordCard
 import ua.edu.mobile.smartlife.ui.components.icon
 
 private const val WATER_GOAL_LITERS = 2.0
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Stateful-обгортка: отримує ViewModel і передає її стан у HomeContent. */
 @Composable
 fun HomeScreen(
-    userName: String,
-    records: List<HealthRecord>,
+    onRecordClick: (Long) -> Unit,
+    onOpenRecords: () -> Unit,
+    onLogout: () -> Unit,
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    HomeContent(
+        uiState = uiState,
+        onAddWater = viewModel::addWaterGlass,
+        onRecordClick = onRecordClick,
+        onOpenRecords = onOpenRecords,
+        onLogout = onLogout
+    )
+}
+
+/** Stateless-частина: лише малює те, що отримала в параметрах. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeContent(
+    uiState: HomeUiState,
     onAddWater: () -> Unit,
     onRecordClick: (Long) -> Unit,
     onOpenRecords: () -> Unit,
@@ -58,8 +77,7 @@ fun HomeScreen(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
-    // Підсумок перераховується автоматично, коли змінюється список records
-    val summary = records.toDailySummary()
+    val summary = uiState.summary
 
     Scaffold(
         topBar = {
@@ -94,7 +112,7 @@ fun HomeScreen(
         ) {
             item {
                 Text(
-                    text = "Вітаю, $userName!",
+                    text = "Вітаю, ${uiState.userName}!",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -123,7 +141,7 @@ fun HomeScreen(
                     TextButton(onClick = onOpenRecords) { Text("Усі записи") }
                 }
             }
-            items(records.take(3), key = { it.id }) { record ->
+            items(uiState.recentRecords, key = { it.id }) { record ->
                 RecordCard(record = record, onClick = { onRecordClick(record.id) })
             }
         }
