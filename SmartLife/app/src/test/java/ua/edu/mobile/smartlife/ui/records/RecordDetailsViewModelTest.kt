@@ -1,5 +1,6 @@
 package ua.edu.mobile.smartlife.ui.records
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -17,6 +18,7 @@ import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.repository.InMemoryRecordRepository
 
+@OptIn(ExperimentalCoroutinesApi::class) // API тестових диспетчерів позначено як експериментальне
 class RecordDetailsViewModelTest {
 
     @get:Rule

@@ -1,5 +1,6 @@
 package ua.edu.mobile.smartlife.ui.records
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -29,6 +30,7 @@ private class FakeHealthAlerts : HealthAlerts {
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class) // API тестових диспетчерів позначено як експериментальне
 class RecordsViewModelTest {
 
     @get:Rule
