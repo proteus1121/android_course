@@ -57,7 +57,11 @@ object AppViewModelProvider {
         }
         initializer {
             val container = smartLifeApplication().container
-            SettingsViewModel(container.settingsRepository, container.notificationHelper)
+            SettingsViewModel(
+                container.settingsRepository,
+                container.notificationHelper,
+                container.reminderScheduler
+            )
         }
         initializer {
             val container = smartLifeApplication().container

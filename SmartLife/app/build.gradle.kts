@@ -14,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.13"
+        versionName = "0.14"
     }
 
     buildTypes {
@@ -55,5 +55,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.osmdroid.android)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.work.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

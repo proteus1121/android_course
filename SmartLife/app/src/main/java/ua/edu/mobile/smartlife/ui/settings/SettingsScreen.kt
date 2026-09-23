@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,11 +43,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.WorkInfo
 import ua.edu.mobile.smartlife.data.settings.ThemeMode
 import ua.edu.mobile.smartlife.data.settings.UserSettings
 import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.components.PermissionCard
+import ua.edu.mobile.smartlife.ui.components.formatDate
 import ua.edu.mobile.smartlife.ui.components.rememberPermissionsState
+import ua.edu.mobile.smartlife.work.ReminderStatus
 
 /** POST_NOTIFICATIONS існує лише з Android 13; на старіших версіях дозвіл не потрібен. */
 private val notificationPermissions: List<String> =
@@ -58,8 +63,12 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val reminderStatus by viewModel.reminderStatus.collectAsStateWithLifecycle()
     SettingsContent(
         settings = settings,
+        reminderStatus = reminderStatus,
+        onRemindersChange = viewModel::setReminders,
+        onRunReminderNow = viewModel::runReminderNow,
         onBack = onBack,
         onSaveName = viewModel::setUserName,
         onThemeChange = viewModel::setThemeMode,
@@ -72,6 +81,9 @@ fun SettingsScreen(
 @Composable
 fun SettingsContent(
     settings: UserSettings?,
+    reminderStatus: ReminderStatus?,
+    onRemindersChange: (enabled: Boolean, intervalMinutes: Long) -> Unit,
+    onRunReminderNow: () -> Unit,
     onBack: () -> Unit,
     onSaveName: (String) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
@@ -172,7 +184,61 @@ fun SettingsContent(
                     Icon(Icons.Filled.NotificationsActive, contentDescription = null)
                     Text("Надіслати тестове нагадування", modifier = Modifier.padding(start = 8.dp))
                 }
+                ReminderSettings(
+                    settings = settings,
+                    status = reminderStatus,
+                    onChange = onRemindersChange,
+                    onRunNow = onRunReminderNow
+                )
             }
         }
+    }
+}
+
+/** Керування періодичними нагадуваннями (WorkManager). */
+@Composable
+private fun ReminderSettings(
+    settings: UserSettings,
+    status: ReminderStatus?,
+    onChange: (Boolean, Long) -> Unit,
+    onRunNow: () -> Unit
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text("Нагадування про воду")
+            Text(
+                "Працюють у фоні, навіть коли застосунок закрито",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = settings.remindersEnabled,
+            onCheckedChange = { onChange(it, settings.reminderIntervalMinutes) }
+        )
+    }
+    if (settings.remindersEnabled) {
+        Text("Інтервал", style = MaterialTheme.typography.labelLarge)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(15L, 30L, 60L, 120L).forEach { minutes ->
+                FilterChip(
+                    selected = settings.reminderIntervalMinutes == minutes,
+                    onClick = { onChange(true, minutes) },
+                    label = { Text(if (minutes < 60) "$minutes хв" else "${minutes / 60} год") }
+                )
+            }
+        }
+        val stateText = when (status?.state) {
+            WorkInfo.State.ENQUEUED -> "заплановано"
+            WorkInfo.State.RUNNING -> "виконується"
+            WorkInfo.State.CANCELLED -> "скасовано"
+            null -> "—"
+            else -> status.state.name
+        }
+        Text("Стан задачі: $stateText", style = MaterialTheme.typography.bodyMedium)
+        status?.nextRunAt?.let {
+            Text("Наступний запуск: ${formatDate(it)}", style = MaterialTheme.typography.bodyMedium)
+        }
+        OutlinedButton(onClick = onRunNow) { Text("Перевірити зараз") }
     }
 }
