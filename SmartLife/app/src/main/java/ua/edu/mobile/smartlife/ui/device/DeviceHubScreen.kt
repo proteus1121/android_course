@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,11 +38,13 @@ private data class DeviceFeature(
 @Composable
 fun DeviceHubScreen(
     onOpenBluetooth: () -> Unit,
-    onOpenLocation: () -> Unit
+    onOpenLocation: () -> Unit,
+    onOpenSensors: () -> Unit
 ) {
     val features = listOf(
         DeviceFeature("Bluetooth LE", "Пошук і підключення пульсометра", Icons.Filled.Bluetooth, onOpenBluetooth),
-        DeviceFeature("Геолокація", "Координати GPS у реальному часі", Icons.Filled.LocationOn, onOpenLocation)
+        DeviceFeature("Геолокація", "Координати GPS у реальному часі", Icons.Filled.LocationOn, onOpenLocation),
+        DeviceFeature("Сенсори", "Акселерометр, гіроскоп, світло, наближення", Icons.Filled.Speed, onOpenSensors)
     )
 
     Scaffold(topBar = { TopAppBar(title = { Text("Можливості пристрою") }) }) { innerPadding ->

@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
 @Serializable object DeviceRoute
 @Serializable object BleRoute
 @Serializable object LocationRoute
+@Serializable object SensorsRoute
 @Serializable data class RecordDetailsRoute(val recordId: Long)
 
 /** Пункт нижньої панелі навігації. */

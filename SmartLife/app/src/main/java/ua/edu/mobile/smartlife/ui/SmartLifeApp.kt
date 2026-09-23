@@ -34,11 +34,13 @@ import ua.edu.mobile.smartlife.ui.navigation.MapRoute
 import ua.edu.mobile.smartlife.ui.navigation.ProfileRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordDetailsRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordsRoute
+import ua.edu.mobile.smartlife.ui.navigation.SensorsRoute
 import ua.edu.mobile.smartlife.ui.navigation.SettingsRoute
 import ua.edu.mobile.smartlife.ui.navigation.topLevelDestinations
 import ua.edu.mobile.smartlife.ui.profile.ProfileScreen
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsScreen
 import ua.edu.mobile.smartlife.ui.records.RecordsScreen
+import ua.edu.mobile.smartlife.ui.sensors.SensorsScreen
 import ua.edu.mobile.smartlife.ui.settings.SettingsScreen
 
 /** Кореневий composable: нижня панель + граф навігації між екранами. */
@@ -116,7 +118,8 @@ fun SmartLifeApp() {
             composable<DeviceRoute> {
                 DeviceHubScreen(
                     onOpenBluetooth = { navController.navigate(BleRoute) },
-                    onOpenLocation = { navController.navigate(LocationRoute) }
+                    onOpenLocation = { navController.navigate(LocationRoute) },
+                    onOpenSensors = { navController.navigate(SensorsRoute) }
                 )
             }
             composable<BleRoute> {
@@ -124,6 +127,9 @@ fun SmartLifeApp() {
             }
             composable<LocationRoute> {
                 LocationScreen(onBack = { navController.popBackStack() })
+            }
+            composable<SensorsRoute> {
+                SensorsScreen(onBack = { navController.popBackStack() })
             }
             composable<SettingsRoute> {
                 SettingsScreen(onBack = { navController.popBackStack() })

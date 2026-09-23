@@ -13,6 +13,7 @@ import ua.edu.mobile.smartlife.data.repository.RoomRecordRepository
 import ua.edu.mobile.smartlife.data.repository.WeatherRepository
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
 import ua.edu.mobile.smartlife.location.LocationClient
+import ua.edu.mobile.smartlife.sensors.SensorReader
 
 /**
  * Контейнер залежностей (ручний Dependency Injection):
@@ -48,6 +49,10 @@ class AppContainer(private val context: Context) {
 
     val profilePhotoStorage: ProfilePhotoStorage by lazy {
         ProfilePhotoStorage(context)
+    }
+
+    val sensorReader: SensorReader by lazy {
+        SensorReader(context)
     }
 
     private companion object {

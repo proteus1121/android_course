@@ -13,6 +13,7 @@ import ua.edu.mobile.smartlife.ui.map.MapViewModel
 import ua.edu.mobile.smartlife.ui.profile.ProfileViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
+import ua.edu.mobile.smartlife.ui.sensors.SensorsViewModel
 import ua.edu.mobile.smartlife.ui.settings.SettingsViewModel
 
 /**
@@ -50,6 +51,9 @@ object AppViewModelProvider {
         }
         initializer {
             LocationViewModel(smartLifeApplication().container.locationClient)
+        }
+        initializer {
+            SensorsViewModel(smartLifeApplication().container.sensorReader)
         }
         initializer {
             SettingsViewModel(smartLifeApplication().container.settingsRepository)
