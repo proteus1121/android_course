@@ -9,6 +9,7 @@ import ua.edu.mobile.smartlife.SmartLifeApplication
 import ua.edu.mobile.smartlife.ui.ble.BleViewModel
 import ua.edu.mobile.smartlife.ui.home.HomeViewModel
 import ua.edu.mobile.smartlife.ui.location.LocationViewModel
+import ua.edu.mobile.smartlife.ui.map.MapViewModel
 import ua.edu.mobile.smartlife.ui.profile.ProfileViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
@@ -42,6 +43,10 @@ object AppViewModelProvider {
         initializer {
             val container = smartLifeApplication().container
             BleViewModel(container.bleManager, container.recordRepository)
+        }
+        initializer {
+            val container = smartLifeApplication().container
+            MapViewModel(container.recordRepository, container.locationClient)
         }
         initializer {
             LocationViewModel(smartLifeApplication().container.locationClient)

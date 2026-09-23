@@ -24,11 +24,13 @@ import ua.edu.mobile.smartlife.ui.ble.BleScreen
 import ua.edu.mobile.smartlife.ui.device.DeviceHubScreen
 import ua.edu.mobile.smartlife.ui.home.HomeScreen
 import ua.edu.mobile.smartlife.ui.location.LocationScreen
+import ua.edu.mobile.smartlife.ui.map.MapScreen
 import ua.edu.mobile.smartlife.ui.navigation.BleRoute
 import ua.edu.mobile.smartlife.ui.navigation.DeviceRoute
 import ua.edu.mobile.smartlife.ui.navigation.HomeRoute
 import ua.edu.mobile.smartlife.ui.navigation.LocationRoute
 import ua.edu.mobile.smartlife.ui.navigation.LoginRoute
+import ua.edu.mobile.smartlife.ui.navigation.MapRoute
 import ua.edu.mobile.smartlife.ui.navigation.ProfileRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordDetailsRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordsRoute
@@ -107,6 +109,9 @@ fun SmartLifeApp() {
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                     onLogout = { navController.logout() }
                 )
+            }
+            composable<MapRoute> {
+                MapScreen()
             }
             composable<DeviceRoute> {
                 DeviceHubScreen(
