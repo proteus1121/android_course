@@ -14,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.6"
+        versionName = "0.7"
     }
 
     buildTypes {
@@ -28,6 +28,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true // клас BuildConfig з полем DEBUG (потрібен для логування запитів)
     }
 }
 
@@ -47,5 +48,8 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.okhttp.logging)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

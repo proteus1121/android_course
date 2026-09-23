@@ -56,8 +56,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val weatherState by viewModel.weatherState.collectAsStateWithLifecycle()
     HomeContent(
         uiState = uiState,
+        weatherState = weatherState,
+        onRetryWeather = viewModel::loadWeather,
         onAddWater = viewModel::addWaterGlass,
         onRecordClick = onRecordClick,
         onOpenRecords = onOpenRecords,
@@ -71,6 +74,8 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     uiState: HomeUiState,
+    weatherState: WeatherUiState,
+    onRetryWeather: () -> Unit,
     onAddWater: () -> Unit,
     onRecordClick: (Long) -> Unit,
     onOpenRecords: () -> Unit,
@@ -127,6 +132,9 @@ fun HomeContent(
                     text = "Ваші показники за сьогодні",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+            item {
+                WeatherCard(state = weatherState, onRetry = onRetryWeather)
             }
             item {
                 WaterCard(

@@ -2,8 +2,11 @@ package ua.edu.mobile.smartlife.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -11,7 +14,9 @@ import ua.edu.mobile.smartlife.data.model.DailySummary
 import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.model.toDailySummary
+import ua.edu.mobile.smartlife.data.remote.toUserMessage
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
+import ua.edu.mobile.smartlife.data.repository.WeatherRepository
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
 
 /** Усе, що потрібно головному екрану, в одному об'єкті. */
@@ -24,7 +29,8 @@ data class HomeUiState(
 
 class HomeViewModel(
     private val recordRepository: RecordRepository,
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    private val weatherRepository: WeatherRepository
 ) : ViewModel() {
 
     // combine об'єднує два потоки: новий стан з'являється, коли змінюється БУДЬ-ЯКИЙ з них
@@ -42,6 +48,29 @@ class HomeViewModel(
         // Перетворюємо Flow на StateFlow, який "живе" поки на екран хтось дивиться (+5 с запасу)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
+    // Стан погоди: Loading -> Success або Error
+    private val _weatherState = MutableStateFlow<WeatherUiState>(WeatherUiState.Loading)
+    val weatherState: StateFlow<WeatherUiState> = _weatherState.asStateFlow()
+
+    init {
+        loadWeather()
+    }
+
+    fun loadWeather() {
+        viewModelScope.launch {
+            _weatherState.value = WeatherUiState.Loading
+            _weatherState.value = try {
+                // Поки що координати фіксовані (Київ); у розділі 9 візьмемо їх з GPS
+                val weather = weatherRepository.getCurrentWeather(KYIV_LATITUDE, KYIV_LONGITUDE)
+                WeatherUiState.Success(weather)
+            } catch (e: CancellationException) {
+                throw e // скасування корутини не є помилкою — передаємо його далі
+            } catch (e: Exception) {
+                WeatherUiState.Error(e.toUserMessage())
+            }
+        }
+    }
+
     fun addWaterGlass() {
         viewModelScope.launch {
             recordRepository.addRecord(
@@ -50,3 +79,6 @@ class HomeViewModel(
         }
     }
 }
+
+private const val KYIV_LATITUDE = 50.4501
+private const val KYIV_LONGITUDE = 30.5234

@@ -20,7 +20,11 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             val container = smartLifeApplication().container
-            HomeViewModel(container.recordRepository, container.settingsRepository)
+            HomeViewModel(
+                container.recordRepository,
+                container.settingsRepository,
+                container.weatherRepository
+            )
         }
         initializer {
             RecordsViewModel(smartLifeApplication().container.recordRepository)
