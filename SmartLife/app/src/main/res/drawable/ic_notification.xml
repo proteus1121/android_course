@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Мала іконка сповіщення: лише білий силует (система сама зафарбовує її) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M24,43.5l-2.9,-2.6C10.8,31.5 4,25.4 4,17.9 4,11.8 8.8,7 14.9,7c3.4,0 6.7,1.6 9.1,4.1C26.4,8.6 29.7,7 33.1,7 39.2,7 44,11.8 44,17.9c0,7.5 -6.8,13.6 -17.1,23l-2.9,2.6z" />
+</vector>

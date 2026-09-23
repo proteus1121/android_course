@@ -1,5 +1,7 @@
 package ua.edu.mobile.smartlife.ui.settings
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +13,8 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -39,6 +44,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ua.edu.mobile.smartlife.data.settings.ThemeMode
 import ua.edu.mobile.smartlife.data.settings.UserSettings
 import ua.edu.mobile.smartlife.ui.AppViewModelProvider
+import ua.edu.mobile.smartlife.ui.components.PermissionCard
+import ua.edu.mobile.smartlife.ui.components.rememberPermissionsState
+
+/** POST_NOTIFICATIONS існує лише з Android 13; на старіших версіях дозвіл не потрібен. */
+private val notificationPermissions: List<String> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) listOf(Manifest.permission.POST_NOTIFICATIONS)
+    else emptyList()
 
 @Composable
 fun SettingsScreen(
@@ -51,7 +63,8 @@ fun SettingsScreen(
         onBack = onBack,
         onSaveName = viewModel::setUserName,
         onThemeChange = viewModel::setThemeMode,
-        onWaterGoalChange = viewModel::setWaterGoal
+        onWaterGoalChange = viewModel::setWaterGoal,
+        onTestNotification = viewModel::sendTestNotification
     )
 }
 
@@ -62,7 +75,8 @@ fun SettingsContent(
     onBack: () -> Unit,
     onSaveName: (String) -> Unit,
     onThemeChange: (ThemeMode) -> Unit,
-    onWaterGoalChange: (Double) -> Unit
+    onWaterGoalChange: (Double) -> Unit,
+    onTestNotification: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -140,6 +154,25 @@ fun SettingsContent(
                 valueRange = 1f..4f,
                 steps = 11 // крок 0.25 л
             )
+
+            HorizontalDivider()
+
+            // --- Сповіщення ---
+            Text("Сповіщення", style = MaterialTheme.typography.titleMedium)
+            val notificationPermission = rememberPermissionsState(notificationPermissions)
+            if (!notificationPermission.granted) {
+                PermissionCard(
+                    icon = Icons.Filled.Notifications,
+                    title = "Дозвольте сповіщення",
+                    rationale = "Smart Life нагадуватиме пити воду та попереджатиме про високий пульс.",
+                    state = notificationPermission
+                )
+            } else {
+                OutlinedButton(onClick = onTestNotification) {
+                    Icon(Icons.Filled.NotificationsActive, contentDescription = null)
+                    Text("Надіслати тестове нагадування", modifier = Modifier.padding(start = 8.dp))
+                }
+            }
         }
     }
 }

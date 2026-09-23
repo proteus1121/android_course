@@ -15,5 +15,7 @@ class SmartLifeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // Канали сповіщень треба створити до показу першого сповіщення
+        container.notificationHelper.createChannels()
     }
 }

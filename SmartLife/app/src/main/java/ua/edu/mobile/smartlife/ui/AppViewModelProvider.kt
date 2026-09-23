@@ -33,7 +33,7 @@ object AppViewModelProvider {
         }
         initializer {
             val container = smartLifeApplication().container
-            RecordsViewModel(container.recordRepository, container.locationClient)
+            RecordsViewModel(container.recordRepository, container.locationClient, container.notificationHelper)
         }
         initializer {
             RecordDetailsViewModel(
@@ -56,7 +56,8 @@ object AppViewModelProvider {
             SensorsViewModel(smartLifeApplication().container.sensorReader)
         }
         initializer {
-            SettingsViewModel(smartLifeApplication().container.settingsRepository)
+            val container = smartLifeApplication().container
+            SettingsViewModel(container.settingsRepository, container.notificationHelper)
         }
         initializer {
             val container = smartLifeApplication().container

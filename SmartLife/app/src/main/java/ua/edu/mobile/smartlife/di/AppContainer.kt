@@ -13,6 +13,7 @@ import ua.edu.mobile.smartlife.data.repository.RoomRecordRepository
 import ua.edu.mobile.smartlife.data.repository.WeatherRepository
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
 import ua.edu.mobile.smartlife.location.LocationClient
+import ua.edu.mobile.smartlife.notifications.NotificationHelper
 import ua.edu.mobile.smartlife.sensors.SensorReader
 
 /**
@@ -53,6 +54,10 @@ class AppContainer(private val context: Context) {
 
     val sensorReader: SensorReader by lazy {
         SensorReader(context)
+    }
+
+    val notificationHelper: NotificationHelper by lazy {
+        NotificationHelper(context)
     }
 
     private companion object {

@@ -10,11 +10,13 @@ import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
 import ua.edu.mobile.smartlife.location.LocationClient
+import ua.edu.mobile.smartlife.notifications.NotificationHelper
 
 /** ViewModel екрана «Журнал»: отримує дані з репозиторію, а не зберігає їх сама. */
 class RecordsViewModel(
     private val recordRepository: RecordRepository,
-    private val locationClient: LocationClient
+    private val locationClient: LocationClient,
+    private val notificationHelper: NotificationHelper
 ) : ViewModel() {
 
     val records: StateFlow<List<HealthRecord>> = recordRepository.observeRecords()
@@ -33,6 +35,10 @@ class RecordsViewModel(
                     longitude = location?.longitude
                 )
             )
+            // Високий пульс — показуємо попередження
+            if (type == RecordType.PULSE && value >= NotificationHelper.HIGH_PULSE_THRESHOLD) {
+                notificationHelper.showHighPulseAlert(value.toInt())
+            }
         }
     }
 }
