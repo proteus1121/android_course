@@ -55,7 +55,8 @@ object AppViewModelProvider {
             SettingsViewModel(smartLifeApplication().container.settingsRepository)
         }
         initializer {
-            ProfileViewModel(smartLifeApplication().container.settingsRepository)
+            val container = smartLifeApplication().container
+            ProfileViewModel(container.settingsRepository, container.profilePhotoStorage)
         }
     }
 }

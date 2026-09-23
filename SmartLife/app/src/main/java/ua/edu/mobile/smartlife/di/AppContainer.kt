@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import ua.edu.mobile.smartlife.ble.BleManager
 import ua.edu.mobile.smartlife.data.local.AppDatabase
+import ua.edu.mobile.smartlife.data.profile.ProfilePhotoStorage
 import ua.edu.mobile.smartlife.data.remote.NetworkModule
 import ua.edu.mobile.smartlife.data.remote.WeatherApi
 import ua.edu.mobile.smartlife.data.repository.NetworkWeatherRepository
@@ -43,6 +44,10 @@ class AppContainer(private val context: Context) {
 
     val locationClient: LocationClient by lazy {
         LocationClient(context)
+    }
+
+    val profilePhotoStorage: ProfilePhotoStorage by lazy {
+        ProfilePhotoStorage(context)
     }
 
     private companion object {

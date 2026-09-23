@@ -21,7 +21,8 @@ enum class ThemeMode(val title: String) {
 data class UserSettings(
     val userName: String = "Користувач",
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
-    val waterGoalLiters: Double = 2.0
+    val waterGoalLiters: Double = 2.0,
+    val profilePhotoPath: String? = null
 )
 
 // Один DataStore на файл: створюємо як розширення Context (файл settings.preferences_pb)
@@ -35,13 +36,15 @@ class SettingsRepository(private val context: Context) {
         val USER_NAME = stringPreferencesKey("user_name")
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val WATER_GOAL = doublePreferencesKey("water_goal")
+        val PROFILE_PHOTO = stringPreferencesKey("profile_photo_path")
     }
 
     val settings: Flow<UserSettings> = context.dataStore.data.map { prefs ->
         UserSettings(
             userName = prefs[Keys.USER_NAME] ?: UserSettings().userName,
             themeMode = prefs[Keys.THEME_MODE]?.let { ThemeMode.valueOf(it) } ?: ThemeMode.SYSTEM,
-            waterGoalLiters = prefs[Keys.WATER_GOAL] ?: UserSettings().waterGoalLiters
+            waterGoalLiters = prefs[Keys.WATER_GOAL] ?: UserSettings().waterGoalLiters,
+            profilePhotoPath = prefs[Keys.PROFILE_PHOTO]
         )
     }
 
@@ -55,5 +58,11 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setWaterGoal(liters: Double) {
         context.dataStore.edit { it[Keys.WATER_GOAL] = liters }
+    }
+
+    suspend fun setProfilePhotoPath(path: String?) {
+        context.dataStore.edit { prefs ->
+            if (path == null) prefs.remove(Keys.PROFILE_PHOTO) else prefs[Keys.PROFILE_PHOTO] = path
+        }
     }
 }
