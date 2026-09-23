@@ -4,6 +4,26 @@
     <!-- Дозвіл на доступ до мережі (надається автоматично, без запиту користувачу) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Bluetooth: Android 12+ (API 31+) — окремі дозволи на пошук і підключення -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Bluetooth: Android 11 і старіші -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+    <!-- required="false": застосунок можна встановити й на пристрій без BLE -->
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
     <application
         android:name=".SmartLifeApplication"
         android:allowBackup="true"

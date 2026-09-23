@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import ua.edu.mobile.smartlife.SmartLifeApplication
+import ua.edu.mobile.smartlife.ui.ble.BleViewModel
 import ua.edu.mobile.smartlife.ui.home.HomeViewModel
 import ua.edu.mobile.smartlife.ui.profile.ProfileViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsViewModel
@@ -34,6 +35,10 @@ object AppViewModelProvider {
                 savedStateHandle = createSavedStateHandle(),
                 recordRepository = smartLifeApplication().container.recordRepository
             )
+        }
+        initializer {
+            val container = smartLifeApplication().container
+            BleViewModel(container.bleManager, container.recordRepository)
         }
         initializer {
             SettingsViewModel(smartLifeApplication().container.settingsRepository)

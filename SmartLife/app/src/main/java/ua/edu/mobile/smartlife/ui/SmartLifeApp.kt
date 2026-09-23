@@ -20,7 +20,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import ua.edu.mobile.smartlife.ui.auth.LoginScreen
+import ua.edu.mobile.smartlife.ui.ble.BleScreen
+import ua.edu.mobile.smartlife.ui.device.DeviceHubScreen
 import ua.edu.mobile.smartlife.ui.home.HomeScreen
+import ua.edu.mobile.smartlife.ui.navigation.BleRoute
+import ua.edu.mobile.smartlife.ui.navigation.DeviceRoute
 import ua.edu.mobile.smartlife.ui.navigation.HomeRoute
 import ua.edu.mobile.smartlife.ui.navigation.LoginRoute
 import ua.edu.mobile.smartlife.ui.navigation.ProfileRoute
@@ -101,6 +105,14 @@ fun SmartLifeApp() {
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                     onLogout = { navController.logout() }
                 )
+            }
+            composable<DeviceRoute> {
+                DeviceHubScreen(
+                    onOpenBluetooth = { navController.navigate(BleRoute) }
+                )
+            }
+            composable<BleRoute> {
+                BleScreen(onBack = { navController.popBackStack() })
             }
             composable<SettingsRoute> {
                 SettingsScreen(onBack = { navController.popBackStack() })

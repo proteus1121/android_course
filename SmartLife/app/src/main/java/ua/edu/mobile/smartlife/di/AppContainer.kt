@@ -2,6 +2,7 @@ package ua.edu.mobile.smartlife.di
 
 import android.content.Context
 import androidx.room.Room
+import ua.edu.mobile.smartlife.ble.BleManager
 import ua.edu.mobile.smartlife.data.local.AppDatabase
 import ua.edu.mobile.smartlife.data.remote.NetworkModule
 import ua.edu.mobile.smartlife.data.remote.WeatherApi
@@ -33,6 +34,10 @@ class AppContainer(private val context: Context) {
     val weatherRepository: WeatherRepository by lazy {
         val api = NetworkModule.createRetrofit(WEATHER_BASE_URL).create(WeatherApi::class.java)
         NetworkWeatherRepository(api)
+    }
+
+    val bleManager: BleManager by lazy {
+        BleManager(context)
     }
 
     private companion object {
