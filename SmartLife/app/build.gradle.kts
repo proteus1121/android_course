@@ -28,7 +28,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.17"
+        versionName = "1.0"
 
         // "Запускач" інструментальних (UI) тестів на пристрої/емуляторі
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
