@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -18,8 +19,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,31 +33,39 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ua.edu.mobile.smartlife.data.FakeData
+import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
+import ua.edu.mobile.smartlife.data.model.toDailySummary
 import ua.edu.mobile.smartlife.ui.components.RecordCard
 import ua.edu.mobile.smartlife.ui.components.icon
+
+private const val WATER_GOAL_LITERS = 2.0
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    userName: String,
+    records: List<HealthRecord>,
+    onAddWater: () -> Unit,
     onRecordClick: (Long) -> Unit,
     onOpenRecords: () -> Unit,
     onLogout: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
+    // Підсумок перераховується автоматично, коли змінюється список records
+    val summary = records.toDailySummary()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Smart Life") },
                 actions = {
-                    // Меню "три крапки" у верхній панелі
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = "Меню")
                     }
@@ -74,7 +85,6 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        val records = FakeData.records
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,7 +94,7 @@ fun HomeScreen(
         ) {
             item {
                 Text(
-                    text = "Вітаю, ${FakeData.userName}!",
+                    text = "Вітаю, $userName!",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -94,27 +104,22 @@ fun HomeScreen(
                 )
             }
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SummaryCard(RecordType.WATER.icon, "Вода", "0.5 л", Modifier.weight(1f))
-                    SummaryCard(RecordType.PULSE.icon, "Пульс", "72", Modifier.weight(1f))
-                }
+                WaterCard(liters = summary.waterLiters, onAddWater = onAddWater)
             }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SummaryCard(RecordType.SLEEP.icon, "Сон", "7.5 год", Modifier.weight(1f))
-                    SummaryCard(RecordType.WEIGHT.icon, "Вага", "64.2 кг", Modifier.weight(1f))
+                    SummaryCard(RecordType.PULSE.icon, "Пульс", summary.lastPulse.format(""), Modifier.weight(1f))
+                    SummaryCard(RecordType.SLEEP.icon, "Сон", summary.lastSleep.format("год"), Modifier.weight(1f))
+                    SummaryCard(RecordType.WEIGHT.icon, "Вага", summary.lastWeight.format("кг"), Modifier.weight(1f))
                 }
             }
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "Останні записи",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 12.dp)
-                    )
+                    Text("Останні записи", style = MaterialTheme.typography.titleMedium)
                     TextButton(onClick = onOpenRecords) { Text("Усі записи") }
                 }
             }
@@ -137,6 +142,33 @@ fun HomeScreen(
     }
 }
 
+/** Картка води з прогресом до денної цілі та кнопкою швидкого додавання. */
+@Composable
+private fun WaterCard(liters: Double, onAddWater: () -> Unit) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(RecordType.WATER.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = "Вода: ${"%.2f".format(liters)} з $WATER_GOAL_LITERS л",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                )
+            }
+            LinearProgressIndicator(
+                progress = { (liters / WATER_GOAL_LITERS).toFloat().coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            FilledTonalButton(onClick = onAddWater) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Text("Склянка води (0.25 л)", modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+    }
+}
+
 /** Невелика картка з одним показником. */
 @Composable
 fun SummaryCard(
@@ -149,7 +181,11 @@ fun SummaryCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Text(title, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 8.dp))
-            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
     }
 }
+
+/** null -> «—», інакше число з одиницею. */
+private fun Double?.format(unit: String): String =
+    if (this == null) "—" else "${if (this % 1.0 == 0.0) toLong() else this} $unit".trim()

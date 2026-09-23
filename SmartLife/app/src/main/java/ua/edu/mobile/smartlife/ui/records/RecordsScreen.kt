@@ -17,24 +17,30 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ua.edu.mobile.smartlife.data.FakeData
 import ua.edu.mobile.smartlife.data.model.HealthRecord
+import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.ui.components.RecordCard
 
+/**
+ * Екран списку без власних даних (stateless): список приходить параметром,
+ * а про нові записи екран повідомляє через onAddRecord (state hoisting).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordsScreen(onRecordClick: (Long) -> Unit) {
-    // Локальний стан списку: живе, доки екран на екрані (у розділі 4 перенесемо у ViewModel)
-    val records = remember { FakeData.records.toMutableStateList() }
-    var showAddDialog by remember { mutableStateOf(false) }
+fun RecordsScreen(
+    records: List<HealthRecord>,
+    onAddRecord: (RecordType, Double, String) -> Unit,
+    onRecordClick: (Long) -> Unit
+) {
+    // Стан діалогу — суто UI-стан, тому лишається локальним
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Журнал показників") }) },
+        topBar = { TopAppBar(title = { Text("Журнал показників (${records.size})") }) },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Icon(Icons.Filled.Add, contentDescription = "Додати запис")
@@ -58,8 +64,7 @@ fun RecordsScreen(onRecordClick: (Long) -> Unit) {
         AddRecordDialog(
             onDismiss = { showAddDialog = false },
             onSave = { type, value, note ->
-                val newId = (records.maxOfOrNull { it.id } ?: 0) + 1
-                records.add(0, HealthRecord(id = newId, type = type, value = value, note = note))
+                onAddRecord(type, value, note)
                 showAddDialog = false
             }
         )

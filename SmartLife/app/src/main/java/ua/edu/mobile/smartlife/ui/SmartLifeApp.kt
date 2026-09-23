@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -20,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import ua.edu.mobile.smartlife.data.FakeData
 import ua.edu.mobile.smartlife.ui.auth.LoginScreen
 import ua.edu.mobile.smartlife.ui.home.HomeScreen
 import ua.edu.mobile.smartlife.ui.navigation.HomeRoute
@@ -31,6 +34,7 @@ import ua.edu.mobile.smartlife.ui.navigation.topLevelDestinations
 import ua.edu.mobile.smartlife.ui.profile.ProfileScreen
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsScreen
 import ua.edu.mobile.smartlife.ui.records.RecordsScreen
+import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
 
 /** Кореневий composable: нижня панель + граф навігації між екранами. */
 @Composable
@@ -38,6 +42,10 @@ fun SmartLifeApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
+
+    // Одна ViewModel на всю Activity: її стан спільний для всіх екранів (розділ 4)
+    val recordsViewModel: RecordsViewModel = viewModel()
+    val records by recordsViewModel.records.collectAsStateWithLifecycle()
 
     // Нижню панель показуємо лише на "головних" екранах
     val showBottomBar = topLevelDestinations.any { currentDestination.isOn(it.route) }
@@ -78,6 +86,9 @@ fun SmartLifeApp() {
             }
             composable<HomeRoute> {
                 HomeScreen(
+                    userName = FakeData.userName,
+                    records = records,
+                    onAddWater = recordsViewModel::addWaterGlass,
                     onRecordClick = { id -> navController.navigate(RecordDetailsRoute(id)) },
                     onOpenRecords = { navController.navigateToTopLevel(RecordsRoute) },
                     onLogout = { navController.logout() }
@@ -85,13 +96,20 @@ fun SmartLifeApp() {
             }
             composable<RecordsRoute> {
                 RecordsScreen(
+                    records = records,
+                    onAddRecord = recordsViewModel::addRecord,
                     onRecordClick = { id -> navController.navigate(RecordDetailsRoute(id)) }
                 )
             }
             composable<RecordDetailsRoute> { entry ->
                 val route: RecordDetailsRoute = entry.toRoute()
                 RecordDetailsScreen(
-                    recordId = route.recordId,
+                    // Передаємо між екранами лише id, а сам запис знаходимо у спільному стані
+                    record = records.find { it.id == route.recordId },
+                    onDelete = { id ->
+                        recordsViewModel.deleteRecord(id)
+                        navController.popBackStack()
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }
