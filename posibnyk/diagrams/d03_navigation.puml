@@ -1,0 +1,30 @@
+@startuml
+' Граф навігації застосунку Smart Life
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+hide empty description
+
+state "LoginRoute\nВхід" as Login
+state "RegisterRoute\nРеєстрація" as Register
+state "Нижня панель навігації" as Bottom {
+  state "HomeRoute\nГоловна" as Home
+  state "RecordsRoute\nЖурнал" as Records
+  state "MapRoute\nКарта" as Map
+  state "DeviceRoute\nПристрій" as Device
+  state "ProfileRoute\nПрофіль" as Profile
+}
+state "RecordDetailsRoute(recordId)\nДеталі запису" as Details
+state "SettingsRoute\nНалаштування" as Settings
+state "BleRoute / LocationRoute /\nSensorsRoute" as Hw
+
+[*] --> Login
+Login --> Register : «Створити акаунт»
+Register --> Login : «Назад»
+Login --> Home : вхід (popUpTo Login)
+Records --> Details : натискання на запис
+Details --> Records : «Назад»
+Home --> Settings : меню
+Profile --> Settings
+Device --> Hw
+@enduml

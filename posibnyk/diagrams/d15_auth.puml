@@ -1,0 +1,31 @@
+@startuml
+' Вхід користувача і збереження сесії
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 15
+
+actor "Користувач" as U
+participant "LoginViewModel" as VM
+participant "AuthRepository" as Repo
+participant "dummyjson.com" as Srv
+participant "SessionStorage" as SS
+participant "TokenCipher\n(Android Keystore)" as TC
+
+U -> VM : логін, пароль, «Увійти»
+VM -> VM : validate() → помилки полів
+VM -> Repo : login(username, password)
+Repo -> Srv : POST /auth/login
+Srv --> Repo : accessToken, refreshToken, профіль
+Repo -> SS : save(session)
+SS -> TC : encrypt(token)  (розділ 16)
+SS -> SS : DataStore «session»
+Repo --> VM : Session
+VM --> U : перехід на Головну
+== Пізніше ==
+Repo -> Srv : GET /auth/me\nAuthorization: Bearer <accessToken>
+alt 401 Unauthorized
+  Repo -> Srv : POST /auth/refresh
+  Srv --> Repo : нові токени
+  Repo -> SS : updateTokens()
+end
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+' Взаємодія застосунку з BLE-пульсометром
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+
+participant "BleViewModel" as VM
+participant "BleManager" as M
+participant "Android\nBluetooth stack" as OS
+participant "Пульсометр\n(GATT server)" as HR
+
+HR -> OS : advertising (ім'я, сервіс 0x180D)
+VM -> M : scan()
+M -> OS : startScan(settings, callback)
+OS --> M : onScanResult(ScanResult)
+M --> VM : Flow<BleDevice>
+VM -> M : connect(address)
+M -> OS : connectGatt()
+OS -> HR : з'єднання
+OS --> M : onConnectionStateChange(CONNECTED)
+M -> OS : discoverServices()
+OS --> M : onServicesDiscovered
+M -> OS : setCharacteristicNotification(0x2A37)\n+ запис CCCD 0x2902
+loop кожну секунду
+  HR -> OS : notify(Heart Rate Measurement)
+  OS --> M : onCharacteristicChanged(bytes)
+  M --> VM : heartRate: StateFlow<Int?>
+end
+@enduml

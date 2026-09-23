@@ -1,0 +1,15 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+.kotlin
+# Ключі підпису та паролі ніколи не комітимо
+*.jks
+*.keystore
+/keystore.properties

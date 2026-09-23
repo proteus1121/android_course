@@ -1,0 +1,18 @@
+@startuml
+' Життєвий цикл Activity
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+hide empty description
+
+[*] --> Created : onCreate()\nsetContent { ... }
+Created --> Started : onStart()
+Started --> Resumed : onResume()
+Resumed : користувач взаємодіє\nз екраном
+Resumed --> Paused : onPause()\n(діалог, інший застосунок)
+Paused --> Resumed : onResume()
+Paused --> Stopped : onStop()\n(екран не видно)
+Stopped --> Started : onRestart()
+Stopped --> Destroyed : onDestroy()\n(закриття, поворот екрана)
+Destroyed --> [*]
+@enduml

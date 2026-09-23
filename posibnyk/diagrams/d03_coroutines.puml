@@ -1,0 +1,20 @@
+@startuml
+' Виконання корутини: головний потік і фоновий пул потоків
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 14
+
+|Головний потік (Dispatchers.Main)|
+start
+:Користувач натискає\n«Зберегти»;
+:viewModelScope.launch { … };
+:виклик suspend-функції\nrepository.addRecord(record);
+note right: корутина призупиняється,\nголовний потік вільний\nі далі малює інтерфейс
+|Пул потоків (Dispatchers.IO)|
+:Room виконує INSERT\nу базі SQLite;
+|Головний потік (Dispatchers.Main)|
+:корутина продовжується\nз результатом;
+:Flow бази видає новий список;
+:StateFlow оновлює стан,\nCompose перемальовує екран;
+stop
+@enduml

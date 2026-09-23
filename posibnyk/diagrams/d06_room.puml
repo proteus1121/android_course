@@ -1,0 +1,38 @@
+@startuml
+' Компоненти Room і їх зв'язок з репозиторієм
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+hide empty members
+
+class RecordEntity <<@Entity records>> {
+  +id: Long <<PK, autoGenerate>>
+  +type: String
+  +value: Double
+  +note: String
+  +timestamp: Long <<created_at>>
+  +latitude: Double?
+  +longitude: Double?
+}
+interface RecordDao <<@Dao>> {
+  +observeAll(): Flow<List<RecordEntity>>
+  +observeById(id): Flow<RecordEntity?>
+  +insert(record): Long
+  +update(record)
+  +deleteById(id)
+}
+abstract class AppDatabase <<@Database version=1>> {
+  +recordDao(): RecordDao
+}
+class RoomRecordRepository {
+  -dao: RecordDao
+}
+interface RecordRepository
+class HealthRecord <<модель UI>>
+
+AppDatabase --> RecordDao
+RecordDao --> RecordEntity
+RoomRecordRepository ..|> RecordRepository
+RoomRecordRepository --> RecordDao
+RoomRecordRepository ..> HealthRecord : toModel() / toEntity()
+@enduml

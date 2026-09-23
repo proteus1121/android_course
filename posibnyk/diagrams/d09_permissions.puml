@@ -1,0 +1,25 @@
+@startuml
+' Алгоритм запиту небезпечного дозволу
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+
+start
+if (Дозвіл уже надано?\ncheckSelfPermission) then (так)
+else (ні)
+  :Показати пояснення\n(PermissionCard: навіщо дозвіл);
+  :Системний запит\nlauncher.launch(permissions);
+  if (Користувач дозволив?) then (так)
+  else (ні)
+    if (Відмовив удруге?) then (так)
+      :Кнопка «Відкрити налаштування»\n(ACTION_APPLICATION_DETAILS_SETTINGS);
+      stop
+    else (ні)
+      :Показати пояснення ще раз;
+      stop
+    endif
+  endif
+endif
+:Використати функцію\n(отримати координати);
+stop
+@enduml

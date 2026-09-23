@@ -1,0 +1,21 @@
+@startuml
+' Архітектура платформи Android
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 15
+skinparam rectangleFontStyle bold
+
+rectangle "Застосунки\nSmart Life · Камера · Карти · Налаштування" as apps
+rectangle "Java/Kotlin API Framework\nActivity Manager · Package Manager · Notification Manager\nLocation Manager · Sensor Manager · Content Providers" as fw
+rectangle "Android Runtime (ART)\nвиконання DEX-коду, збирач сміття" as art
+rectangle "Нативні бібліотеки C/C++\nSQLite · OpenGL ES · WebKit · Media" as nat
+rectangle "Рівень апаратної абстракції (HAL)\nкамера · Bluetooth · сенсори · GPS · аудіо" as hal
+rectangle "Ядро Linux\nдрайвери · керування пам'яттю і живленням · безпека" as kernel
+
+apps -down-> fw
+fw -down-> art
+fw -down-> nat
+art -down-> hal
+nat -down-> hal
+hal -down-> kernel
+@enduml

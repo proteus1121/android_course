@@ -1,0 +1,19 @@
+@startuml
+' Стани періодичної задачі WorkManager
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+hide empty description
+
+[*] --> ENQUEUED : enqueueUniquePeriodicWork()
+ENQUEUED --> RUNNING : настав час і\nвиконано constraints
+RUNNING --> ENQUEUED : Result.success()\n(наступний період)
+RUNNING --> ENQUEUED : Result.retry()\n(backoff)
+ENQUEUED --> CANCELLED : cancelUniqueWork()
+RUNNING --> CANCELLED : cancelUniqueWork()
+CANCELLED --> [*]
+note right of RUNNING
+  ReminderWorker.doWork():
+  випито < мети → сповіщення
+end note
+@enduml

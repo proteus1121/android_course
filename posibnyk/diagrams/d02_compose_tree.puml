@@ -1,0 +1,19 @@
+@startmindmap
+' Дерево composable-функцій головного екрана Smart Life
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 14
+* HomeContent
+** Scaffold
+*** topBar: TopAppBar\n«Smart Life», меню
+*** content: LazyColumn
+**** item: привітання «Вітаю, …!»
+**** item: WeatherCard (стан погоди)
+**** item: WaterCard (прогрес, кнопка)
+**** item: Row
+***** SummaryCard «Пульс»
+***** SummaryCard «Сон»
+***** SummaryCard «Вага»
+**** items: RecordCard × N
+*** bottomBar: NavigationBar
+@endmindmap

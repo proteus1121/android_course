@@ -1,0 +1,28 @@
+@startuml
+' Послідовність завантаження погоди
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 15
+
+participant "WeatherCard\n(UI)" as UI
+participant "HomeViewModel" as VM
+participant "WeatherRepository" as Repo
+participant "WeatherApi\n(Retrofit)" as Api
+participant "api.open-meteo.com" as Srv
+
+UI -> VM : відкриття екрана / «Оновити»
+VM -> VM : weatherState = Loading
+VM -> Repo : getCurrentWeather(lat, lon)
+Repo -> Api : suspend виклик
+Api -> Srv : GET /v1/forecast?latitude=..&longitude=..
+alt 200 OK
+  Srv --> Api : JSON
+  Api --> Repo : WeatherResponseDto
+  Repo --> VM : Weather (доменна модель)
+  VM --> UI : Success(weather)
+else немає мережі / 4xx / 5xx
+  Api --> Repo : IOException / HttpException
+  Repo --> VM : виняток
+  VM --> UI : Error(toUserMessage())
+end
+@enduml

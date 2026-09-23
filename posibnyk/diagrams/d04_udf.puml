@@ -1,0 +1,16 @@
+@startuml
+' Односпрямований потік даних (UDF)
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+left to right direction
+
+rectangle "UI (Compose)\nRecordsScreen" as ui
+rectangle "ViewModel\nRecordsViewModel\n\nStateFlow<List<HealthRecord>>" as vm
+database "Дані\n(репозиторій)" as data
+
+vm --> ui : стан ↓\ncollectAsStateWithLifecycle()
+ui --> vm : подія ↑\nonAddRecord(), onDelete()
+vm --> data : зміна даних
+data --> vm : новий список (Flow)
+@enduml

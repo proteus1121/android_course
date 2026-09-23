@@ -1,0 +1,20 @@
+@startuml
+' Сповіщення з дією «Випив склянку»
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 13
+
+participant "NotificationHelper" as NH
+participant "NotificationManager\n(система)" as NM
+actor "Користувач" as U
+participant "WaterActionReceiver" as R
+participant "RecordRepository" as Repo
+
+NH -> NM : createChannels()\n(reminders, alerts)
+NH -> NM : notify(ID, notification)\nз PendingIntent дії
+NM -> U : сповіщення в шторці
+U -> NM : натискає «Випив склянку»
+NM -> R : onReceive(intent)
+R -> Repo : addRecord(WATER, 0.25)
+R -> NM : cancel(ID)
+@enduml

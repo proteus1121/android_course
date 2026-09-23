@@ -1,0 +1,29 @@
+@startuml
+' Архітектура MVVM у Smart Life (розділ 5)
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 15
+skinparam packageStyle rectangle
+
+package "UI layer" {
+  [HomeScreen / RecordsScreen] as S
+  [HomeViewModel / RecordsViewModel] as VM
+}
+package "Data layer" {
+  interface RecordRepository as R
+  [InMemoryRecordRepository\n(розділ 5)] as Mem
+  [RoomRecordRepository\n(розділ 6)] as Room
+}
+package "DI" {
+  [AppContainer] as AC
+  [AppViewModelProvider.Factory] as F
+}
+
+S --> VM : події ↑ / стан ↓
+VM --> R
+Mem ..|> R
+Room ..|> R
+F --> AC : бере залежності
+F ..> VM : створює
+AC ..> R : одна реалізація\nна весь застосунок
+@enduml

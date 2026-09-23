@@ -1,0 +1,29 @@
+@startuml
+' Шлях від вихідного коду до застосунку на пристрої
+' Код можна вставити на https://www.planttext.com для редагування
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 17
+left to right direction
+
+rectangle "Kotlin-код\n(*.kt)" as kt
+rectangle "Ресурси\n(res/, Manifest)" as res
+rectangle "Бібліотеки\n(Maven, libs.versions.toml)" as libs
+node "Gradle + AGP" as gradle {
+  rectangle "Компіляція Kotlin\n→ байт-код JVM" as kc
+  rectangle "D8 / R8\n→ DEX-код" as dex
+  rectangle "Пакування\nта підпис" as pack
+}
+artifact "APK / AAB" as apk
+node "Android Emulator\nабо телефон" as device {
+  rectangle "ART\n(Android Runtime)" as art
+}
+
+kt --> kc
+libs --> kc
+kc --> dex
+res --> pack
+dex --> pack
+pack --> apk
+apk --> art : adb install
+@enduml

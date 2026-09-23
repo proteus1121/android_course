@@ -1,0 +1,36 @@
+@startuml
+' Архітектура застосунку Smart Life 1.0 (розділ 18)
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 15
+skinparam packageStyle rectangle
+
+package "ui (Compose + ViewModel)" as UI {
+  [Екрани: Login, Home, Records, Map,\nProfile, Settings, Device] as Screens
+  [ViewModel кожного екрана] as VMs
+}
+package "di" as DI {
+  [AppContainer\nAppViewModelProvider] as AC
+}
+package "data" as DATA {
+  [RecordRepository (Room)\nSettingsRepository (DataStore)] as Local
+  [WeatherRepository (Retrofit)\nAuthRepository + TokenCipher] as Remote
+}
+package "Пристрій і фон" as HW {
+  [BleManager, LocationClient,\nSensorReader, ProfilePhotoStorage] as Hard
+  [ReminderWorker,\nNotificationHelper] as Bg
+}
+database "SQLite, DataStore,\nAndroid Keystore" as Db
+cloud "Open-Meteo,\nDummyJSON" as Net
+
+Screens --> VMs : події
+VMs --> Screens : StateFlow
+AC ..> VMs : створює і\nпередає залежності
+VMs --> Local
+VMs --> Remote
+VMs --> Hard
+VMs --> Bg
+Local --> Db
+Remote --> Net
+Remote --> Db
+@enduml

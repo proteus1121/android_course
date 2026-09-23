@@ -1,0 +1,22 @@
+@startuml
+' Вибір механізму фонової роботи
+!theme plain
+skinparam dpi 180
+skinparam defaultFontSize 14
+
+start
+if (Робота потрібна, лише поки\nвідкритий екран?) then (так)
+  :Корутина у viewModelScope;
+  stop
+endif
+if (Потрібно почати негайно\nі користувач це бачить?\n(музика, навігація, тренування)) then (так)
+  :Foreground Service\nз постійним сповіщенням;
+  stop
+endif
+if (Потрібен точний час\n(будильник, нагадування о 7:00)?) then (так)
+  :AlarmManager\n(точні будильники);
+  stop
+endif
+:WorkManager\n(відкладена гарантована робота:\nсинхронізація, нагадування, завантаження);
+stop
+@enduml
