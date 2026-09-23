@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Політика мережевої безпеки застосунку:
+    - будь-який незашифрований HTTP-трафік заборонено (лише HTTPS);
+    - довіряємо тільки системним сертифікатам.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ua.edu.mobile.smartlife.BuildConfig
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.components.RecordCard
@@ -171,7 +172,14 @@ fun HomeContent(
             onDismissRequest = { showAbout = false },
             icon = { Icon(Icons.Filled.Info, contentDescription = null) },
             title = { Text("Про застосунок") },
-            text = { Text("Smart Life — навчальний застосунок курсу «Мобільна розробка».") },
+            text = {
+                Text(
+                    "Smart Life — навчальний застосунок курсу «Мобільна розробка».\n\n" +
+                        "Версія: ${BuildConfig.VERSION_NAME}\n" +
+                        // Сам ключ НЕ показуємо — лише факт його наявності
+                        "Демо API-ключ: ${if (BuildConfig.DEMO_API_KEY.isNotEmpty()) "налаштовано" else "не задано"}"
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { showAbout = false }) { Text("Зрозуміло") }
             }

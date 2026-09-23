@@ -20,6 +20,8 @@ object NetworkModule {
             // Логуємо запити лише в debug-збірці (у Logcat з тегом okhttp.OkHttpClient)
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
             else HttpLoggingInterceptor.Level.NONE
+            // Токен не повинен потрапляти в логи навіть у debug-збірці
+            redactHeader("Authorization")
         }
         OkHttpClient.Builder()
             .addInterceptor(logging)

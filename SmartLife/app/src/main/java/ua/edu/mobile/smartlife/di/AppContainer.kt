@@ -2,6 +2,7 @@ package ua.edu.mobile.smartlife.di
 
 import android.content.Context
 import androidx.room.Room
+import ua.edu.mobile.smartlife.BuildConfig
 import ua.edu.mobile.smartlife.ble.BleManager
 import ua.edu.mobile.smartlife.data.auth.SessionStorage
 import ua.edu.mobile.smartlife.data.local.AppDatabase
@@ -14,6 +15,7 @@ import ua.edu.mobile.smartlife.data.repository.NetworkWeatherRepository
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
 import ua.edu.mobile.smartlife.data.repository.RoomRecordRepository
 import ua.edu.mobile.smartlife.data.repository.WeatherRepository
+import ua.edu.mobile.smartlife.data.security.TokenCipher
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
 import ua.edu.mobile.smartlife.location.LocationClient
 import ua.edu.mobile.smartlife.notifications.NotificationHelper
@@ -40,7 +42,7 @@ class AppContainer(private val context: Context) {
     }
 
     val weatherRepository: WeatherRepository by lazy {
-        val api = NetworkModule.createRetrofit(WEATHER_BASE_URL).create(WeatherApi::class.java)
+        val api = NetworkModule.createRetrofit(BuildConfig.WEATHER_BASE_URL).create(WeatherApi::class.java)
         NetworkWeatherRepository(api)
     }
 
@@ -69,12 +71,7 @@ class AppContainer(private val context: Context) {
     }
 
     val authRepository: AuthRepository by lazy {
-        val api = NetworkModule.createRetrofit(AUTH_BASE_URL).create(AuthApi::class.java)
-        AuthRepository(api, SessionStorage(context))
-    }
-
-    private companion object {
-        const val WEATHER_BASE_URL = "https://api.open-meteo.com/"
-        const val AUTH_BASE_URL = "https://dummyjson.com/"
+        val api = NetworkModule.createRetrofit(BuildConfig.AUTH_BASE_URL).create(AuthApi::class.java)
+        AuthRepository(api, SessionStorage(context, TokenCipher()))
     }
 }

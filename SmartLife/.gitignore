@@ -9,3 +9,7 @@
 .externalNativeBuild
 .cxx
 .kotlin
+# Ключі підпису та паролі ніколи не комітимо
+*.jks
+*.keystore
+/keystore.properties
