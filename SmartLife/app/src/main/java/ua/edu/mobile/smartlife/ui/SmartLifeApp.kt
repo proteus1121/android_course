@@ -26,10 +26,12 @@ import ua.edu.mobile.smartlife.ui.navigation.LoginRoute
 import ua.edu.mobile.smartlife.ui.navigation.ProfileRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordDetailsRoute
 import ua.edu.mobile.smartlife.ui.navigation.RecordsRoute
+import ua.edu.mobile.smartlife.ui.navigation.SettingsRoute
 import ua.edu.mobile.smartlife.ui.navigation.topLevelDestinations
 import ua.edu.mobile.smartlife.ui.profile.ProfileScreen
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsScreen
 import ua.edu.mobile.smartlife.ui.records.RecordsScreen
+import ua.edu.mobile.smartlife.ui.settings.SettingsScreen
 
 /** Кореневий composable: нижня панель + граф навігації між екранами. */
 @Composable
@@ -79,6 +81,7 @@ fun SmartLifeApp() {
                 HomeScreen(
                     onRecordClick = { id -> navController.navigate(RecordDetailsRoute(id)) },
                     onOpenRecords = { navController.navigateToTopLevel(RecordsRoute) },
+                    onOpenSettings = { navController.navigate(SettingsRoute) },
                     onLogout = { navController.logout() }
                 )
             }
@@ -94,7 +97,13 @@ fun SmartLifeApp() {
                 )
             }
             composable<ProfileRoute> {
-                ProfileScreen(onLogout = { navController.logout() })
+                ProfileScreen(
+                    onOpenSettings = { navController.navigate(SettingsRoute) },
+                    onLogout = { navController.logout() }
+                )
+            }
+            composable<SettingsRoute> {
+                SettingsScreen(onBack = { navController.popBackStack() })
             }
         }
     }

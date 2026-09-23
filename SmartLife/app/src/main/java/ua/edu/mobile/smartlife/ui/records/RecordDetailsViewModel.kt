@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ua.edu.mobile.smartlife.data.model.HealthRecord
+import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
 
 data class RecordDetailsUiState(
@@ -27,6 +28,13 @@ class RecordDetailsViewModel(
     val uiState: StateFlow<RecordDetailsUiState> = recordRepository.observeRecord(recordId)
         .map { RecordDetailsUiState(isLoading = false, record = it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RecordDetailsUiState())
+
+    fun updateRecord(type: RecordType, value: Double, note: String) {
+        val current = uiState.value.record ?: return
+        viewModelScope.launch {
+            recordRepository.updateRecord(current.copy(type = type, value = value, note = note))
+        }
+    }
 
     fun deleteRecord(onDeleted: () -> Unit) {
         viewModelScope.launch {

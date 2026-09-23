@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.ui.AppViewModelProvider
 import ua.edu.mobile.smartlife.ui.components.formatDate
 import ua.edu.mobile.smartlife.ui.components.formattedValue
@@ -41,6 +43,7 @@ fun RecordDetailsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     RecordDetailsContent(
         uiState = uiState,
+        onUpdate = viewModel::updateRecord,
         onDelete = { viewModel.deleteRecord(onDeleted = onBack) },
         onBack = onBack
     )
@@ -50,11 +53,13 @@ fun RecordDetailsScreen(
 @Composable
 fun RecordDetailsContent(
     uiState: RecordDetailsUiState,
+    onUpdate: (RecordType, Double, String) -> Unit,
     onDelete: () -> Unit,
     onBack: () -> Unit
 ) {
     val record = uiState.record
     var confirmDelete by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -67,6 +72,9 @@ fun RecordDetailsContent(
                 },
                 actions = {
                     if (record != null) {
+                        IconButton(onClick = { showEditDialog = true }) {
+                            Icon(Icons.Filled.Edit, contentDescription = "Редагувати")
+                        }
                         IconButton(onClick = { confirmDelete = true }) {
                             Icon(Icons.Filled.Delete, contentDescription = "Видалити")
                         }
@@ -103,6 +111,21 @@ fun RecordDetailsContent(
             Text("Нотатка", style = MaterialTheme.typography.titleMedium)
             Text(record.note.ifBlank { "—" })
         }
+    }
+
+    if (showEditDialog && record != null) {
+        // Той самий діалог, що й для створення, але з початковими значеннями запису
+        AddRecordDialog(
+            title = "Редагування запису",
+            initialType = record.type,
+            initialValue = record.value.toString(),
+            initialNote = record.note,
+            onDismiss = { showEditDialog = false },
+            onSave = { type, value, note ->
+                onUpdate(type, value, note)
+                showEditDialog = false
+            }
+        )
     }
 
     if (confirmDelete && record != null) {

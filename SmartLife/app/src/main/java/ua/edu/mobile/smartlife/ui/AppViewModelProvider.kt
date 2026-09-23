@@ -7,8 +7,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import ua.edu.mobile.smartlife.SmartLifeApplication
 import ua.edu.mobile.smartlife.ui.home.HomeViewModel
+import ua.edu.mobile.smartlife.ui.profile.ProfileViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
+import ua.edu.mobile.smartlife.ui.settings.SettingsViewModel
 
 /**
  * Фабрика ViewModel: пояснює Android, ЯК створити кожну ViewModel
@@ -17,7 +19,8 @@ import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            HomeViewModel(smartLifeApplication().container.recordRepository)
+            val container = smartLifeApplication().container
+            HomeViewModel(container.recordRepository, container.settingsRepository)
         }
         initializer {
             RecordsViewModel(smartLifeApplication().container.recordRepository)
@@ -27,6 +30,12 @@ object AppViewModelProvider {
                 savedStateHandle = createSavedStateHandle(),
                 recordRepository = smartLifeApplication().container.recordRepository
             )
+        }
+        initializer {
+            SettingsViewModel(smartLifeApplication().container.settingsRepository)
+        }
+        initializer {
+            ProfileViewModel(smartLifeApplication().container.settingsRepository)
         }
     }
 }

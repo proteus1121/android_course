@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,14 +24,31 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ua.edu.mobile.smartlife.data.FakeData
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ua.edu.mobile.smartlife.ui.AppViewModelProvider
+
+@Composable
+fun ProfileScreen(
+    onOpenSettings: () -> Unit,
+    onLogout: () -> Unit,
+    viewModel: ProfileViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    ProfileContent(uiState = uiState, onOpenSettings = onOpenSettings, onLogout = onLogout)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(onLogout: () -> Unit) {
+fun ProfileContent(
+    uiState: ProfileUiState,
+    onOpenSettings: () -> Unit,
+    onLogout: () -> Unit
+) {
     Scaffold(topBar = { TopAppBar(title = { Text("Профіль") }) }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -54,12 +73,18 @@ fun ProfileScreen(onLogout: () -> Unit) {
                     )
                 }
             }
-            Text(FakeData.userName, style = MaterialTheme.typography.headlineSmall)
+            Text(uiState.name, style = MaterialTheme.typography.headlineSmall)
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             ListItem(
-                headlineContent = { Text(FakeData.userEmail) },
+                headlineContent = { Text(uiState.email) },
                 supportingContent = { Text("Електронна пошта") },
                 leadingContent = { Icon(Icons.Filled.Email, contentDescription = null) }
+            )
+            ListItem(
+                headlineContent = { Text("Налаштування") },
+                leadingContent = { Icon(Icons.Filled.Settings, contentDescription = null) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null) },
+                modifier = Modifier.clickable(onClick = onOpenSettings)
             )
             ListItem(
                 headlineContent = { Text("Вийти з акаунта") },
