@@ -110,6 +110,14 @@ fun RecordDetailsContent(
             }
             Text("Нотатка", style = MaterialTheme.typography.titleMedium)
             Text(record.note.ifBlank { "—" })
+            Text("Місце", style = MaterialTheme.typography.titleMedium)
+            Text(
+                if (record.latitude != null && record.longitude != null) {
+                    "%.5f, %.5f".format(record.latitude, record.longitude)
+                } else {
+                    "Не визначено"
+                }
+            )
         }
     }
 

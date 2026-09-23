@@ -18,6 +18,7 @@ import ua.edu.mobile.smartlife.data.remote.toUserMessage
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
 import ua.edu.mobile.smartlife.data.repository.WeatherRepository
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
+import ua.edu.mobile.smartlife.location.LocationClient
 
 /** Усе, що потрібно головному екрану, в одному об'єкті. */
 data class HomeUiState(
@@ -30,7 +31,8 @@ data class HomeUiState(
 class HomeViewModel(
     private val recordRepository: RecordRepository,
     settingsRepository: SettingsRepository,
-    private val weatherRepository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
+    private val locationClient: LocationClient
 ) : ViewModel() {
 
     // combine об'єднує два потоки: новий стан з'являється, коли змінюється БУДЬ-ЯКИЙ з них
@@ -60,9 +62,18 @@ class HomeViewModel(
         viewModelScope.launch {
             _weatherState.value = WeatherUiState.Loading
             _weatherState.value = try {
-                // Поки що координати фіксовані (Київ); у розділі 9 візьмемо їх з GPS
-                val weather = weatherRepository.getCurrentWeather(KYIV_LATITUDE, KYIV_LONGITUDE)
-                WeatherUiState.Success(weather)
+                // Якщо є дозвіл — беремо координати пристрою, інакше типові (Київ)
+                val location = runCatching {
+                    locationClient.getLastLocation() ?: locationClient.getCurrentLocation()
+                }.getOrNull()
+                val weather = weatherRepository.getCurrentWeather(
+                    latitude = location?.latitude ?: KYIV_LATITUDE,
+                    longitude = location?.longitude ?: KYIV_LONGITUDE
+                )
+                WeatherUiState.Success(
+                    weather = weather,
+                    placeLabel = if (location != null) "Ваше місце" else "Київ (типово)"
+                )
             } catch (e: CancellationException) {
                 throw e // скасування корутини не є помилкою — передаємо його далі
             } catch (e: Exception) {
@@ -73,8 +84,15 @@ class HomeViewModel(
 
     fun addWaterGlass() {
         viewModelScope.launch {
+            val location = runCatching { locationClient.getLastLocation() }.getOrNull()
             recordRepository.addRecord(
-                HealthRecord(type = RecordType.WATER, value = 0.25, note = "Склянка води")
+                HealthRecord(
+                    type = RecordType.WATER,
+                    value = 0.25,
+                    note = "Склянка води",
+                    latitude = location?.latitude,
+                    longitude = location?.longitude
+                )
             )
         }
     }

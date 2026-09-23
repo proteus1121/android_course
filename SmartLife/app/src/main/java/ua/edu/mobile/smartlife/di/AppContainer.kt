@@ -11,6 +11,7 @@ import ua.edu.mobile.smartlife.data.repository.RecordRepository
 import ua.edu.mobile.smartlife.data.repository.RoomRecordRepository
 import ua.edu.mobile.smartlife.data.repository.WeatherRepository
 import ua.edu.mobile.smartlife.data.settings.SettingsRepository
+import ua.edu.mobile.smartlife.location.LocationClient
 
 /**
  * Контейнер залежностей (ручний Dependency Injection):
@@ -38,6 +39,10 @@ class AppContainer(private val context: Context) {
 
     val bleManager: BleManager by lazy {
         BleManager(context)
+    }
+
+    val locationClient: LocationClient by lazy {
+        LocationClient(context)
     }
 
     private companion object {

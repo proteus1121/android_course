@@ -8,6 +8,7 @@ import ua.edu.mobile.smartlife.data.model.Weather
  */
 sealed interface WeatherUiState {
     data object Loading : WeatherUiState
-    data class Success(val weather: Weather) : WeatherUiState
+    /** placeLabel — звідки взято координати: з GPS чи типові (Київ). */
+    data class Success(val weather: Weather, val placeLabel: String) : WeatherUiState
     data class Error(val message: String) : WeatherUiState
 }

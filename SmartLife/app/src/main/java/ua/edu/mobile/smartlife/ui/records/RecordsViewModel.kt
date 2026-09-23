@@ -9,10 +9,12 @@ import kotlinx.coroutines.launch
 import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
+import ua.edu.mobile.smartlife.location.LocationClient
 
 /** ViewModel екрана «Журнал»: отримує дані з репозиторію, а не зберігає їх сама. */
 class RecordsViewModel(
-    private val recordRepository: RecordRepository
+    private val recordRepository: RecordRepository,
+    private val locationClient: LocationClient
 ) : ViewModel() {
 
     val records: StateFlow<List<HealthRecord>> = recordRepository.observeRecords()
@@ -20,7 +22,17 @@ class RecordsViewModel(
 
     fun addRecord(type: RecordType, value: Double, note: String) {
         viewModelScope.launch {
-            recordRepository.addRecord(HealthRecord(type = type, value = value, note = note))
+            // Прив'язуємо запис до місця (якщо користувач дозволив геолокацію)
+            val location = runCatching { locationClient.getLastLocation() }.getOrNull()
+            recordRepository.addRecord(
+                HealthRecord(
+                    type = type,
+                    value = value,
+                    note = note,
+                    latitude = location?.latitude,
+                    longitude = location?.longitude
+                )
+            )
         }
     }
 }

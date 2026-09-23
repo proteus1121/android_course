@@ -83,7 +83,7 @@ fun WeatherCard(
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
-                                "Координати: ${"%.2f".format(weather.latitude)}, ${"%.2f".format(weather.longitude)}",
+                                "${state.placeLabel}: ${"%.2f".format(weather.latitude)}, ${"%.2f".format(weather.longitude)}",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

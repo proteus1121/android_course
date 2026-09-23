@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import ua.edu.mobile.smartlife.SmartLifeApplication
 import ua.edu.mobile.smartlife.ui.ble.BleViewModel
 import ua.edu.mobile.smartlife.ui.home.HomeViewModel
+import ua.edu.mobile.smartlife.ui.location.LocationViewModel
 import ua.edu.mobile.smartlife.ui.profile.ProfileViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordDetailsViewModel
 import ua.edu.mobile.smartlife.ui.records.RecordsViewModel
@@ -24,11 +25,13 @@ object AppViewModelProvider {
             HomeViewModel(
                 container.recordRepository,
                 container.settingsRepository,
-                container.weatherRepository
+                container.weatherRepository,
+                container.locationClient
             )
         }
         initializer {
-            RecordsViewModel(smartLifeApplication().container.recordRepository)
+            val container = smartLifeApplication().container
+            RecordsViewModel(container.recordRepository, container.locationClient)
         }
         initializer {
             RecordDetailsViewModel(
@@ -39,6 +42,9 @@ object AppViewModelProvider {
         initializer {
             val container = smartLifeApplication().container
             BleViewModel(container.bleManager, container.recordRepository)
+        }
+        initializer {
+            LocationViewModel(smartLifeApplication().container.locationClient)
         }
         initializer {
             SettingsViewModel(smartLifeApplication().container.settingsRepository)
