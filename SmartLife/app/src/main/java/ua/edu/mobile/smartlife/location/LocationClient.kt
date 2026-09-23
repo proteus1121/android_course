@@ -37,12 +37,17 @@ private fun Location.toLocationData() = LocationData(
     time = time
 )
 
+/** Джерело координат. Інтерфейс дозволяє підмінити реальний GPS фейком у тестах (розділ 17). */
+interface LocationSource {
+    suspend fun getLastLocation(): LocationData?
+}
+
 /**
  * Обгортка над Fused Location Provider (Google Play services).
  * "Fused" = "злитий": сервіс сам комбінує GPS, Wi-Fi та мобільну мережу.
  */
 @SuppressLint("MissingPermission") // перед викликом методів перевіряємо hasPermission()
-class LocationClient(private val context: Context) {
+class LocationClient(private val context: Context) : LocationSource {
 
     private val fusedClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -53,7 +58,7 @@ class LocationClient(private val context: Context) {
         }
 
     /** Останнє відоме місцезнаходження — швидко, але може бути застарілим або null. */
-    suspend fun getLastLocation(): LocationData? {
+    override suspend fun getLastLocation(): LocationData? {
         if (!hasPermission()) return null
         return fusedClient.lastLocation.await()?.toLocationData()
     }
@@ -61,10 +66,9 @@ class LocationClient(private val context: Context) {
     /** Свіже місцезнаходження: сервіс увімкне GPS і дочекається нового значення. */
     suspend fun getCurrentLocation(): LocationData? {
         if (!hasPermission()) return null
-        val tokenSource = CancellationTokenSource()
         return fusedClient
-            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, tokenSource.token)
-            .await(tokenSource)
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+            .await() // await() перетворює Task з Play services на suspend-виклик
             ?.toLocationData()
     }
 

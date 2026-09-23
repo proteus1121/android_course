@@ -9,14 +9,15 @@ import kotlinx.coroutines.launch
 import ua.edu.mobile.smartlife.data.model.HealthRecord
 import ua.edu.mobile.smartlife.data.model.RecordType
 import ua.edu.mobile.smartlife.data.repository.RecordRepository
-import ua.edu.mobile.smartlife.location.LocationClient
+import ua.edu.mobile.smartlife.location.LocationSource
+import ua.edu.mobile.smartlife.notifications.HealthAlerts
 import ua.edu.mobile.smartlife.notifications.NotificationHelper
 
 /** ViewModel екрана «Журнал»: отримує дані з репозиторію, а не зберігає їх сама. */
 class RecordsViewModel(
     private val recordRepository: RecordRepository,
-    private val locationClient: LocationClient,
-    private val notificationHelper: NotificationHelper
+    private val locationSource: LocationSource,
+    private val healthAlerts: HealthAlerts
 ) : ViewModel() {
 
     val records: StateFlow<List<HealthRecord>> = recordRepository.observeRecords()
@@ -25,7 +26,7 @@ class RecordsViewModel(
     fun addRecord(type: RecordType, value: Double, note: String) {
         viewModelScope.launch {
             // Прив'язуємо запис до місця (якщо користувач дозволив геолокацію)
-            val location = runCatching { locationClient.getLastLocation() }.getOrNull()
+            val location = runCatching { locationSource.getLastLocation() }.getOrNull()
             recordRepository.addRecord(
                 HealthRecord(
                     type = type,
@@ -37,7 +38,7 @@ class RecordsViewModel(
             )
             // Високий пульс — показуємо попередження
             if (type == RecordType.PULSE && value >= NotificationHelper.HIGH_PULSE_THRESHOLD) {
-                notificationHelper.showHighPulseAlert(value.toInt())
+                healthAlerts.showHighPulseAlert(value.toInt())
             }
         }
     }

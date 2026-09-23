@@ -15,10 +15,15 @@ import androidx.core.content.ContextCompat
 import ua.edu.mobile.smartlife.MainActivity
 import ua.edu.mobile.smartlife.R
 
+/** Попередження про небезпечні показники. Інтерфейс — щоб у тестах не показувати справжні сповіщення. */
+interface HealthAlerts {
+    fun showHighPulseAlert(bpm: Int)
+}
+
 /**
  * Усе про сповіщення в одному місці: канали, перевірка дозволу, показ сповіщень.
  */
-class NotificationHelper(private val context: Context) {
+class NotificationHelper(private val context: Context) : HealthAlerts {
 
     private val manager = NotificationManagerCompat.from(context)
 
@@ -70,7 +75,7 @@ class NotificationHelper(private val context: Context) {
     }
 
     /** Попередження з високим пріоритетом (показується як спливаюче). */
-    fun showHighPulseAlert(bpm: Int) {
+    override fun showHighPulseAlert(bpm: Int) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ALERTS)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Високий пульс: $bpm уд/хв")

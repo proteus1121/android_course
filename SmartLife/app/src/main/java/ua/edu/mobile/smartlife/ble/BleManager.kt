@@ -109,6 +109,10 @@ class BleManager(private val context: Context) {
         val device = adapter?.getRemoteDevice(address) ?: return
         disconnect()
         _connectionState.value = BleConnectionState.CONNECTING
+        // autoConnect = false: підключитися одразу; TRANSPORT_LE — саме через BLE, а не Classic.
+        // У SDK Android 17 connectGatt позначено як deprecated, але метод і далі працює
+        // на всіх версіях Android — перевіряйте документацію щодо нового API.
+        @Suppress("DEPRECATION")
         gatt = device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
     }
 

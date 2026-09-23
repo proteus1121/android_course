@@ -28,7 +28,10 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.16"
+        versionName = "0.17"
+
+        // "Запускач" інструментальних (UI) тестів на пристрої/емуляторі
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Адреси серверів — у BuildConfig, а не "розкидані" по коду
         buildConfigField("String", "WEATHER_BASE_URL", "\"https://api.open-meteo.com/\"")
@@ -100,4 +103,16 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.work.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Unit-тести (виконуються на комп'ютері, у JVM)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Інструментальні UI-тести (виконуються на емуляторі або телефоні)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.espresso.core) // нова версія потрібна для Android 16+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
